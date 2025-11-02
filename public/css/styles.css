@@ -1,6 +1,214 @@
-/******* Change Box Model ***************/
-*,
-*:before,
-*:after {
-  box-sizing: border-box;
+:root {
+  --color-primary: #004080;
+  --color-secondary: #002f5f;
+  --color-accent: #002f5f;
+  --color-light: #fff;
+  --color-dark: #222;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --shadow-medium: 0 0 10px rgba(0, 0, 0, 0.3);
+  --shadow-light: 0 0 5px rgba(0, 0, 0, 0.2);
+  --radius-medium: 8px;
+  --radius-large: 10px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background-image: url('/images/site/checkerboard.jpg');
+  background-size: 70%;
+  background-repeat: repeat;
+  color: var(--color-dark);
+}
+
+#wrapper {
+  background-color: var(--color-light);
+  margin: 2rem auto;
+  padding: 1.5rem;
+  max-width: 960px;
+  box-shadow: var(--shadow-medium);
+  border-radius: var(--radius-medium);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-primary);
+  color: var(--color-light);
+  padding: 1rem;
+}
+
+.siteName a,
+#tools a,
+nav li a {
+  color: var(--color-light);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav {
+  background-color: var(--color-secondary);
+  padding: 0.75rem 1rem;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  justify-content: space-around;
+  color: var(--color-light);
+}
+
+main {
+  margin-top: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+h2,
+h3 {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+#hero {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+  color: var(--color-light);
+  background-image: url('/images/vehicles/delorean.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-medium);
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+.car-info {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #000;
+  padding: 1.5rem;
+  border-radius: var(--radius-large);
+  max-width: 350px;
+  box-shadow: var(--shadow-medium);
+}
+
+.car-info h2 {
+  margin-top: 0;
+  color: var(--color-primary);
+}
+
+.car-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.car-info li {
+  margin-bottom: 0.3rem;
+}
+
+.car-info img {
+  margin-top: 1rem;
+  width: 150px;
+  height: auto;
+}
+#upgrades-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.upgrades {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.upgrade-item {
+  background-color: var(--color-accent);
+  padding: 1rem;
+  text-align: center;
+  border-radius: 6px;
+  box-shadow: var(--shadow-light);
+}
+
+.upgrade-item img {
+  width: 80px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+.upgrade-item p {
+  margin: 0;
+  font-weight: bold;
+  color: var(--color-light);
+}
+.reviews {
+  width: 100%;
+}
+
+.reviews h3 {
+  margin-bottom: 1rem;
+}
+
+.reviews ul {
+  list-style: none;
+  padding: 0;
+}
+.reviews li {
+  margin-bottom: 0.5rem;
+}
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-light);
+}
+@media screen and (min-width: 768px) {
+  #hero {
+    flex-direction: row;
+  }
+
+  #upgrades-reviews {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .upgrades,
+  .reviews {
+    width: 45%;
+  }
+  .car-info img {
+    width: 180px;
+  }
+}
+@media (max-width: 600px) {
+  #hero {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .car-info {
+    max-width: 90%;
+  }
 }
