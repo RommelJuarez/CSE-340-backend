@@ -132,6 +132,7 @@ h3 {
   width: 150px;
   height: auto;
 }
+
 #upgrades-reviews {
   display: flex;
   flex-direction: column;
@@ -163,6 +164,7 @@ h3 {
   font-weight: bold;
   color: var(--color-light);
 }
+
 .reviews {
   width: 100%;
 }
@@ -175,9 +177,11 @@ h3 {
   list-style: none;
   padding: 0;
 }
+
 .reviews li {
   margin-bottom: 0.5rem;
 }
+
 footer {
   text-align: center;
   margin-top: 2rem;
@@ -185,6 +189,84 @@ footer {
   background-color: var(--color-primary);
   color: var(--color-light);
 }
+
+#inv-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  list-style: none;
+  font-family: var(--font-main);
+  background-color: var(--color-light);
+}
+
+#inv-display li {
+  background-color: var(--color-light);
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#inv-display li:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+#inv-display img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-bottom: 1px solid var(--color-secondary);
+}
+
+.namePrice {
+  padding: 1rem;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  text-align: center;
+}
+
+.namePrice hr {
+  border: none;
+  border-top: 1px solid var(--color-secondary);
+  margin: 0.5rem 0;
+}
+
+.namePrice h2 {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  color: var(--color-primary);
+}
+
+.namePrice h2 a {
+  text-decoration: none;
+  color: var(--color-primary);
+  transition: color 0.2s ease;
+}
+
+.namePrice h2 a:hover {
+  color: var(--color-accent);
+}
+
+.namePrice span {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-dark);
+  margin-top: 0.5rem;
+}
+
+.notice {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--color-dark);
+  padding: 2rem;
+  font-family: var(--font-main);
+}
+
 @media screen and (min-width: 768px) {
   #hero {
     flex-direction: row;
@@ -194,14 +276,17 @@ footer {
     flex-direction: row;
     justify-content: space-between;
   }
+
   .upgrades,
   .reviews {
     width: 45%;
   }
+
   .car-info img {
     width: 180px;
   }
 }
+
 @media (max-width: 600px) {
   #hero {
     justify-content: center;
