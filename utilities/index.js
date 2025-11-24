@@ -28,31 +28,31 @@ Util.getNav = async function (req, res, next) {
 /* **************************************
 * Build the classification view HTML
 * ************************************ */
-Util.buildClassificationGrid = async function(data){
+Util.buildClassificationGrid = async function (data) {
   let grid
-  if(data.length > 0){
+  if (data.length > 0) {
     grid = '<ul id="inv-display">'
-    data.forEach(vehicle => { 
+    data.forEach(vehicle => {
       grid += '<li>'
-      grid +=  '<a href="../../inv/detail/'+ vehicle.inv_id 
-      + '" title="View ' + vehicle.inv_make + ' '+ vehicle.inv_model 
-      + 'details"><img src="' + vehicle.inv_thumbnail 
-      +'" alt="Image of '+ vehicle.inv_make + ' ' + vehicle.inv_model 
-      +' on CSE Motors" /></a>'
+      grid += '<a href="../../inv/detail/' + vehicle.inv_id
+        + '" title="View ' + vehicle.inv_make + ' ' + vehicle.inv_model
+        + 'details"><img src="' + vehicle.inv_thumbnail
+        + '" alt="Image of ' + vehicle.inv_make + ' ' + vehicle.inv_model
+        + ' on CSE Motors" /></a>'
       grid += '<div class="namePrice">'
       grid += '<hr />'
       grid += '<h2>'
-      grid += '<a href="../../inv/detail/' + vehicle.inv_id +'" title="View ' 
-      + vehicle.inv_make + ' ' + vehicle.inv_model + ' details">' 
-      + vehicle.inv_make + ' ' + vehicle.inv_model + '</a>'
+      grid += '<a href="../../inv/detail/' + vehicle.inv_id + '" title="View '
+        + vehicle.inv_make + ' ' + vehicle.inv_model + ' details">'
+        + vehicle.inv_make + ' ' + vehicle.inv_model + '</a>'
       grid += '</h2>'
-      grid += '<span>$' 
-      + new Intl.NumberFormat('en-US').format(vehicle.inv_price) + '</span>'
+      grid += '<span>$'
+        + new Intl.NumberFormat('en-US').format(vehicle.inv_price) + '</span>'
       grid += '</div>'
       grid += '</li>'
     })
     grid += '</ul>'
-  } else { 
+  } else {
     grid += '<p class="notice">Sorry, no matching vehicles could be found.</p>'
   }
   return grid
@@ -60,11 +60,11 @@ Util.buildClassificationGrid = async function(data){
 
 
 Util.buildDetailView = async function (data) {
-  let detailView=""
+  let detailView = ""
 
   if (data) {
     const vehicle = data
-    const price2=new Intl.NumberFormat('en-US').format(vehicle.inv_price)
+    const price2 = new Intl.NumberFormat('en-US').format(vehicle.inv_price)
     const milesFormatted = vehicle.inv_miles.toLocaleString("en-US")
 
     detailView = `
@@ -82,7 +82,7 @@ Util.buildDetailView = async function (data) {
     `
   } else {
     detailView = "<p>No vehicle data available.</p>"
-    
+
   }
 
   return detailView
@@ -160,7 +160,171 @@ Util.buildRegisterForm = function (req = {}) {
     </form>
   `;
 };
+/* ****************************************
+ * Build management view HTML
+ * **************************************** */
+Util.buildManagementView = function () {
+  return `
+    <ul id="management-view">
+      <li>
+        <a href="/inv/add-classification" title="Add Classification">Add New Classification</a>
+      </li>
+      <li>
+        <a href="/inv/add-inventory" title="Add Inventory">Add New Vehicle</a>
+      </li>
+    </ul>
+  `;
+}
+/* ****************************************
+ * Build add classification form HTML
+ * **************************************** */
 
+Util.buildClassificationForm = function (req = {}) {
+  const { classification_name } = req.body || {};
+
+  return `
+    <form action="/inv/add-classification" method="post" class="register-form">
+      <label for="classification_name_input">Classification Name</label>
+      <div class="password-hint">
+        Classification names must not contain spaces or special characters. Only letters and numbers are allowed.
+      </div>
+      <input
+        type="text"
+        id="classification_name_input"
+        name="classification_name"
+        required
+        pattern="^[A-Za-z0-9]+$"
+        title="Only letters and numbers are allowed. No spaces or special characters."
+        placeholder="Enter classification name"
+        value="${classification_name || ''}"
+      />
+
+      <button type="submit">Add Classification</button>
+    </form>
+  `;
+};
+/* ****************************************
+ * Build add inventory form HTML
+ * **************************************** */
+Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
+  const {
+    inv_make,
+    inv_model,
+    inv_year,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_miles,
+    inv_color,
+    classification_id,
+  } = req.body || {}
+
+  // Generar las opciones del select desde classificationList.rows
+  let selectOptions = '<option value="">Choose a Classification</option>';
+  
+  if (classificationList && classificationList.rows) {
+    classificationList.rows.forEach(item => {
+      const selected = classification_id == item.classification_id ? 'selected' : '';
+      selectOptions += `<option value="${item.classification_id}" ${selected}>${item.classification_name}</option>`;
+    });
+  }
+
+  return `
+    <form action="/inv/add-inventory" method="post" class="register-form">
+      <label for="inv_make">Make</label>
+      <input type="text" id="inv_make" name="inv_make" required value="${inv_make || ''}" placeholder="Enter vehicle make (e.g., Toyota, Ford)" />
+
+      <label for="inv_model">Model</label>
+      <input type="text" id="inv_model" name="inv_model" required value="${inv_model || ''}" placeholder="Enter vehicle model (e.g., Camry, F-150)" />
+
+      <label for="inv_year">Year</label>
+      <input type="number" id="inv_year" name="inv_year" required min="1900" max="2099" value="${inv_year || ''}" placeholder="Enter 4-digit year (e.g., 2024)" />
+
+      <label for="inv_description">Description</label>
+      <textarea id="inv_description" name="inv_description" required placeholder="Enter detailed vehicle description (min 3 characters)">${inv_description || ''}</textarea>
+
+      <label for="inv_image">Image Path</label>
+      <input type="text" id="inv_image" name="inv_image" required value="${inv_image || '/images/vehicles/no-image.png'}" placeholder="/images/vehicles/your-image.png" />
+
+      <label for="inv_thumbnail">Thumbnail Path</label>
+      <input type="text" id="inv_thumbnail" name="inv_thumbnail" required value="${inv_thumbnail || '/images/vehicles/no-image-tn.png'}" placeholder="/images/vehicles/your-thumbnail.png" />
+
+      <label for="inv_price">Price</label>
+      <input type="text" id="inv_price_display" name="inv_price_display" required value="${inv_price ? Number(inv_price).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}) : ''}" placeholder="Enter price (e.g., 15,000 or 15,000.50)" />
+      <input type="hidden" id="inv_price" name="inv_price" value="${inv_price || ''}" />
+
+      <label for="inv_miles">Miles</label>
+      <input type="number" id="inv_miles" name="inv_miles" required min="0" step="1" value="${inv_miles || ''}" placeholder="Enter mileage (e.g., 23456)" />
+
+      <label for="inv_color">Color</label>
+      <input type="text" id="inv_color" name="inv_color" required value="${inv_color || ''}" placeholder="Enter vehicle color (e.g., Red, Blue)" />
+
+      <label for="classification_id">Classification</label>
+      <div class="password-hint">Choose the classification this vehicle belongs to.</div>
+      <select id="classification_id" name="classification_id" required>
+        ${selectOptions}
+      </select>
+
+      <button type="submit">Add Vehicle</button>
+    </form>
+
+    <script>
+      // Formatear precio con comas y decimales
+      const priceDisplay = document.getElementById('inv_price_display');
+      const priceHidden = document.getElementById('inv_price');
+      
+      priceDisplay.addEventListener('input', function(e) {
+        // Eliminar todo excepto números y punto decimal
+        let value = e.target.value.replace(/[^0-9.]/g, '');
+        
+        // Asegurar solo un punto decimal
+        const parts = value.split('.');
+        if (parts.length > 2) {
+          value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Limitar a 2 decimales
+        if (parts.length === 2 && parts[1].length > 2) {
+          value = parts[0] + '.' + parts[1].substring(0, 2);
+        }
+        
+        if (value !== '' && !isNaN(value)) {
+          priceHidden.value = value;
+          
+          // Formatear con comas
+          const numValue = parseFloat(value);
+          const formatted = numValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          });
+          
+          // Mantener el punto decimal si el usuario lo está escribiendo
+          if (value.endsWith('.')) {
+            e.target.value = formatted + '.';
+          } else if (value.includes('.') && value.split('.')[1] === '') {
+            e.target.value = formatted + '.';
+          } else {
+            e.target.value = formatted;
+          }
+        } else if (value === '') {
+          priceHidden.value = '';
+          e.target.value = '';
+        }
+      });
+
+      priceDisplay.addEventListener('blur', function(e) {
+        if (priceHidden.value !== '') {
+          const numValue = parseFloat(priceHidden.value);
+          e.target.value = numValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          });
+        }
+      });
+    </script>
+  `
+}
 
 
 /* ****************************************

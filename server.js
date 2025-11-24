@@ -19,6 +19,7 @@ const pool = require('./database/')
 const accountRoute = require("./routes/accountRoute")
 const bodyParser = require("body-parser")
 
+
 /* ***********************
  * Middleware
  * ************************/
@@ -53,6 +54,8 @@ app.set("layout", "./layouts/layout") // not at views root
 /* ***********************
  * Routes
  *************************/
+
+
 //account routes
 app.use("/account", utilities.handleErrors(accountRoute))
 
