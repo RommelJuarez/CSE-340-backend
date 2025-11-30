@@ -1,5 +1,7 @@
 const invModel = require("../models/inventory-model")
 const Util = {}
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 /* ************************
  * Constructs the nav HTML unordered list
@@ -91,7 +93,9 @@ Util.buildDetailView = async function (data) {
 /* ****************************************
  * Build login form HTML
  * **************************************** */
-Util.buildLoginForm = function () {
+Util.buildLoginForm = function (req = {}) {
+  const { account_email, account_password } = req.body || {};
+  console.log('Building login form with:', account_email, account_password);
   return `
     <form action="/account/login" method="post" class="login-form">
       <label for="email">Email</label>
@@ -101,19 +105,17 @@ Util.buildLoginForm = function () {
         name="email"
         required
         placeholder="Enter your email address"
+        value="${account_email || ''}"
       />
 
       <label for="password">Password</label>
-      <div class="password-hint">
-        Password must be at least 12 characters, with 1 uppercase letter, 1 number, and 1 special character.
-      </div>
       <input
         type="password"
         id="password"
         name="password"
         required
         placeholder="Enter your password"
-        pattern="^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\\s).{12,}$"
+        value="${account_password || ''}"
       />
 
       <button type="submit">Login</button>
@@ -125,6 +127,7 @@ Util.buildLoginForm = function () {
     </p>
   `;
 };
+
 
 /* ****************************************
  * Build registration form HTML
@@ -220,9 +223,9 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
     classification_id,
   } = req.body || {}
 
-  // Generar las opciones del select desde classificationList.rows
+
   let selectOptions = '<option value="">Choose a Classification</option>';
-  
+
   if (classificationList && classificationList.rows) {
     classificationList.rows.forEach(item => {
       const selected = classification_id == item.classification_id ? 'selected' : '';
@@ -251,7 +254,7 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
       <input type="text" id="inv_thumbnail" name="inv_thumbnail" required value="${inv_thumbnail || '/images/vehicles/no-image-tn.png'}" placeholder="/images/vehicles/your-thumbnail.png" />
 
       <label for="inv_price">Price</label>
-      <input type="text" id="inv_price_display" name="inv_price_display" required value="${inv_price ? Number(inv_price).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}) : ''}" placeholder="Enter price (e.g., 15,000 or 15,000.50)" />
+      <input type="text" id="inv_price_display" name="inv_price_display" required value="${inv_price ? Number(inv_price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : ''}" placeholder="Enter price (e.g., 15,000 or 15,000.50)" />
       <input type="hidden" id="inv_price" name="inv_price" value="${inv_price || ''}" />
 
       <label for="inv_miles">Miles</label>
@@ -270,21 +273,21 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
     </form>
 
     <script>
-      // Formatear precio con comas y decimales
+      
       const priceDisplay = document.getElementById('inv_price_display');
       const priceHidden = document.getElementById('inv_price');
       
       priceDisplay.addEventListener('input', function(e) {
-        // Eliminar todo excepto números y punto decimal
+        
         let value = e.target.value.replace(/[^0-9.]/g, '');
         
-        // Asegurar solo un punto decimal
+        
         const parts = value.split('.');
         if (parts.length > 2) {
           value = parts[0] + '.' + parts.slice(1).join('');
         }
         
-        // Limitar a 2 decimales
+        
         if (parts.length === 2 && parts[1].length > 2) {
           value = parts[0] + '.' + parts[1].substring(0, 2);
         }
@@ -292,14 +295,141 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
         if (value !== '' && !isNaN(value)) {
           priceHidden.value = value;
           
-          // Formatear con comas
+          
           const numValue = parseFloat(value);
           const formatted = numValue.toLocaleString('en-US', {
             minimumFractionDigits: 0,
             maximumFractionDigits: 2
           });
           
-          // Mantener el punto decimal si el usuario lo está escribiendo
+          
+          if (value.endsWith('.')) {
+            e.target.value = formatted + '.';
+          } else if (value.includes('.') && value.split('.')[1] === '') {
+            e.target.value = formatted + '.';
+          } else {
+            e.target.value = formatted;
+          }
+        } else if (value === '') {
+          priceHidden.value = '';
+          e.target.value = '';
+        }
+      });
+
+      priceDisplay.addEventListener('blur', function(e) {
+        if (priceHidden.value !== '') {
+          const numValue = parseFloat(priceHidden.value);
+          e.target.value = numValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          });
+        }
+      });
+    </script>
+  `
+}
+/* ****************************************
+ * Build edit inventory form HTML
+ * **************************************** */
+Util.buildEditInventoryForm = function (req = {}, classificationList = "") {
+  const {
+    inv_id,
+    inv_make,
+    inv_model,
+    inv_year,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_miles,
+    inv_color,
+    classification_id,
+  } = req.body || {}
+
+
+
+  let selectOptions = '<option value="">Choose a Classification</option>';
+
+  if (classificationList && classificationList.rows) {
+
+    classificationList.rows.forEach(item => {
+      const selected = classification_id == item.classification_id ? 'selected' : '';
+      selectOptions += `<option value="${item.classification_id}" ${selected}>${item.classification_name}</option>`;
+    });
+  }
+
+  return `
+    <form action="/inv/edit-inventory" method="post" class="register-form" id="updateForm">
+      <label for="inv_make">Make</label>
+      <input type="text" id="inv_make" name="inv_make" required value="${inv_make || ''}" placeholder="Enter vehicle make (e.g., Toyota, Ford)" />
+
+      <label for="inv_model">Model</label>
+      <input type="text" id="inv_model" name="inv_model" required value="${inv_model || ''}" placeholder="Enter vehicle model (e.g., Camry, F-150)" />
+
+      <label for="inv_year">Year</label>
+      <input type="number" id="inv_year" name="inv_year" required min="1900" max="2099" value="${inv_year || ''}" placeholder="Enter 4-digit year (e.g., 2024)" />
+
+      <label for="inv_description">Description</label>
+      <textarea id="inv_description" name="inv_description" required placeholder="Enter detailed vehicle description (min 3 characters)">${inv_description || ''}</textarea>
+
+      <label for="inv_image">Image Path</label>
+      <input type="text" id="inv_image" name="inv_image" required value="${inv_image || '/images/vehicles/no-image.png'}" placeholder="/images/vehicles/your-image.png" />
+
+      <label for="inv_thumbnail">Thumbnail Path</label>
+      <input type="text" id="inv_thumbnail" name="inv_thumbnail" required value="${inv_thumbnail || '/images/vehicles/no-image-tn.png'}" placeholder="/images/vehicles/your-thumbnail.png" />
+
+      <label for="inv_price">Price</label>
+      <input type="text" id="inv_price_display" name="inv_price_display" required value="${inv_price ? Number(inv_price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) : ''}" placeholder="Enter price (e.g., 15,000 or 15,000.50)" />
+      <input type="hidden" id="inv_price" name="inv_price" value="${inv_price || ''}" />
+
+      <label for="inv_miles">Miles</label>
+      <input type="number" id="inv_miles" name="inv_miles" required min="0" step="1" value="${inv_miles || ''}" placeholder="Enter mileage (e.g., 23456)" />
+
+      <label for="inv_color">Color</label>
+      <input type="text" id="inv_color" name="inv_color" required value="${inv_color || ''}" placeholder="Enter vehicle color (e.g., Red, Blue)" />
+
+      <label for="classification_id">Classification</label>
+      <div class="password-hint">Choose the classification this vehicle belongs to.</div>
+      <select id="classification_id" name="classification_id" required>
+        ${selectOptions}
+      </select>
+
+      <button  type="submit" disabled>Update Vehicle</button>
+      <input type="hidden" name="inv_id" value="${inv_id}"/>
+
+    </form>
+    
+    <script>
+      
+      const priceDisplay = document.getElementById('inv_price_display');
+      const priceHidden = document.getElementById('inv_price');
+      
+      priceDisplay.addEventListener('input', function(e) {
+        
+        let value = e.target.value.replace(/[^0-9.]/g, '');
+        
+        
+        const parts = value.split('.');
+        if (parts.length > 2) {
+          value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        
+        if (parts.length === 2 && parts[1].length > 2) {
+          value = parts[0] + '.' + parts[1].substring(0, 2);
+        }
+        
+        if (value !== '' && !isNaN(value)) {
+          priceHidden.value = value;
+          
+          
+          const numValue = parseFloat(value);
+          const formatted = numValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          });
+          
+          
           if (value.endsWith('.')) {
             e.target.value = formatted + '.';
           } else if (value.includes('.') && value.split('.')[1] === '') {
@@ -326,6 +456,30 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
   `
 }
 
+Util.buildClassificationSelect = function (req = {}, classificationList = "") {
+  const { classification_id } = req.body || {};
+
+  let selectOptions = '<option value="">Choose a Classification</option>';
+
+  if (classificationList && classificationList.rows) {
+    classificationList.rows.forEach(item => {
+      const selected = classification_id == item.classification_id ? 'selected' : '';
+      selectOptions += `<option value="${item.classification_id}" ${selected}>${item.classification_name}</option>`;
+    });
+  }
+
+  return `
+    <label for="classification_id">Classification</label>
+    
+    <select id="classification_id" name="classification_id" required>
+      ${selectOptions}
+    </select>
+  `;
+};
+
+
+
+
 
 /* ****************************************
  * Middleware For Handling Errors
@@ -333,4 +487,40 @@ Util.buildAddInventoryForm = function (req = {}, classificationList = "") {
  * General Error Handling
  **************************************** */
 Util.handleErrors = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
+
+/* ****************************************
+* Middleware to check token validity
+**************************************** */
+Util.checkJWTToken = (req, res, next) => {
+  if (req.cookies.jwt) {
+    jwt.verify(
+      req.cookies.jwt,
+      process.env.ACCESS_TOKEN_SECRET,
+      function (err, accountData) {
+        if (err) {
+          req.flash("Please log in")
+          res.clearCookie("jwt")
+          return res.redirect("/account/login")
+        }
+        res.locals.accountData = accountData
+        res.locals.loggedin = 1
+        next()
+      })
+  } else {
+    next()
+  }
+}
+
+/* ****************************************
+ *  Check Login
+ * ************************************ */
+Util.checkLogin = (req, res, next) => {
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
+}
+
 module.exports = Util

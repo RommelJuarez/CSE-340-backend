@@ -189,5 +189,61 @@ validate.checkInventoryData = async (req, res, next) => {
   }
   next()
 }
+/* ******************************
+ * Check inventory edit data and return errors or continue to add inventory
+ * ***************************** */
+validate.checkUpdateData = async (req, res, next) => {
+  
+  if (req.body.inv_price) {
+    req.body.inv_price = req.body.inv_price.replace(/,/g, '')
+  }
+
+  const {
+    inv_id,
+    inv_make,
+    inv_model,
+    inv_year,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_miles,
+    inv_color,
+    classification_id,
+  } = req.body
+  
+  let errors = []
+  errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    const inventory_id = req.params.inventoryId
+        const nav = await utilities.getNav()
+        const classificationList = await invModel.getClassifications()
+        const inventoryData = await invModel.getInventoryById(inventory_id)
+    
+        const editInventory = utilities.buildEditInventoryForm({body:inventoryData}, classificationList)
+        const itemName = `${inventoryData.inv_make} ${inventoryData.inv_model}`
+        res.render("./inventory/edit-inventory", {
+          title: "Edit " + itemName,
+          nav,
+          editInventory,
+          message: req.flash("notice"),
+          errors: null,
+          inv_id: inventoryData.inv_id,
+          inv_make: inventoryData.inv_make,
+          inv_model: inventoryData.inv_model,
+          inv_year: inventoryData.inv_year,
+          inv_description: inventoryData.inv_description,
+          inv_image: inventoryData.inv_image,
+          inv_thumbnail: inventoryData.inv_thumbnail,
+          inv_price: inventoryData.inv_price,
+          inv_miles: inventoryData.inv_miles,
+          inv_color: inventoryData.inv_color,
+          classification_id: inventoryData.classification_id
+        })
+    return
+  }
+  next()
+}
 
 module.exports = validate

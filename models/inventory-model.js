@@ -34,7 +34,9 @@ async function getInventoryById(inventory_id) {
       `SELECT * FROM public.inventory WHERE inv_id = $1`,
       [inventory_id]
     )
+    console.log("Inventory data retrieved:", data.rows[0]); 
     return data.rows[0]
+
   } catch (error) {
     console.error("getInventoryById error " + error)
   }
@@ -88,7 +90,7 @@ async function insertInventoryModel(
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
       ) RETURNING *
     `
-    console.log("Inserting inventory with SQL:", sql)
+    
     return await pool.query(sql, [
       inv_make,
       inv_model,
@@ -107,5 +109,79 @@ async function insertInventoryModel(
   }
 }
 
+/* *****************************
+ *  Update inventory item by ID
+ * *************************** */
+async function updateInventoryModel(
+  inv_id,
+  inv_make,
+  inv_model,
+  inv_year,
+  inv_description,
+  inv_image,
+  inv_thumbnail,
+  inv_price,
+  inv_miles,
+  inv_color,
+  classification_id
+) {
+  try {
+    const sql = `
+      UPDATE public.inventory
+      SET
+        inv_make = $1,
+        inv_model = $2,
+        inv_year = $3,
+        inv_description = $4,
+        inv_image = $5,
+        inv_thumbnail = $6,
+        inv_price = $7,
+        inv_miles = $8,
+        inv_color = $9,
+        classification_id = $10
+      WHERE inv_id = $11
+      RETURNING *
+    `;
+    console.log("Updating inventory with SQL:", sql);
+    return await pool.query(sql, [
+      
+      inv_make,
+      inv_model,
+      inv_year,
+      inv_description,
+      inv_image,
+      inv_thumbnail,
+      inv_price,
+      inv_miles,
+      inv_color,
+      classification_id,
+      inv_id,
+      
+    ]);
+  } catch (error) {
+    console.error("Error updating inventory from model:", error.message);
+    return error.message;
+  }
+}
 
-module.exports = {getClassifications,getInventoryByClassificationId,getInventoryById,insertClassificationModel,insertInventoryModel}
+/* *****************************
+ *  Delete inventory item by ID
+ * *************************** */
+async function deleteInventoryModel(inv_id) {
+  try {
+    const sql = `
+      DELETE FROM public.inventory
+      WHERE inv_id = $1
+      RETURNING *
+    `;
+    
+    return await pool.query(sql, [inv_id]);
+  } catch (error) {
+    console.error("Error deleting inventory:", error.message);
+    return error.message;
+  }
+}
+
+
+
+module.exports = {getClassifications,getInventoryByClassificationId,getInventoryById,insertClassificationModel,insertInventoryModel,updateInventoryModel,deleteInventoryModel}
