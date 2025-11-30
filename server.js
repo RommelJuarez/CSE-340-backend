@@ -70,7 +70,7 @@ app.use(static)
 app.get("/", utilities.handleErrors(baseController.buildHome))
 
 // Inventory routes
-app.use("/inv", utilities.handleErrors(inventoryRoute))
+app.use("/inv", utilities.checkAccountType,utilities.handleErrors(inventoryRoute))
 
 // Error routes
 app.use("/error", utilities.handleErrors(errorRoutes))

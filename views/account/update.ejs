@@ -1,0 +1,57 @@
+<% if (errors) { %>
+  <ul class="notice">
+    <% errors.array().forEach(error => { %>
+      <li><%= error.msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<% if (title) { %>
+  <h1><%= title %></h1>
+<% } else { res.redirect('/') } %>
+
+<%- messages() %>
+
+<main id="account-update">
+
+  <!-- Account Update Form -->
+  <section>
+    <h2>Update Account Information</h2>
+    <form action="/account/update" method="post" class="register-form">
+      <label for="account_firstname">First Name</label>
+      <input type="text" id="account_firstname" name="account_firstname"
+             required value="<%= accountData ? accountData.account_firstname : '' %>" />
+
+      <label for="account_lastname">Last Name</label>
+      <input type="text" id="account_lastname" name="account_lastname"
+             required value="<%= accountData ? accountData.account_lastname : '' %>" />
+
+      <label for="account_email">Email</label>
+      <input type="email" id="account_email" name="account_email"
+             required value="<%= accountData ? accountData.account_email : '' %>" />
+
+      <!-- Hidden account_id -->
+      <input type="hidden" name="account_id" value="<%= accountData ? accountData.account_id : '' %>" />
+
+      <button type="submit">Update Account</button>
+    </form>
+  </section>
+
+  <!-- Change Password Form -->
+  <section>
+    <h2>Change Password</h2>
+    <p>Enter a new password to replace your current one. Passwords must be at least 8 characters long and include letters, numbers, and special characters.</p>
+
+    <form action="/account/update-password" method="post" class="register-form">
+      <label for="account_password">New Password</label>
+      <input type="password" id="account_password" name="account_password"
+             required minlength="8" placeholder="Enter new password" />
+
+      <!-- Hidden account_id -->
+      <input type="hidden" name="account_id" value="<%= accountData ? accountData.account_id : '' %>" />
+
+      <button type="submit">Change Password</button>
+    </form>
+  </section>
+
+</main>

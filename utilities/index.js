@@ -498,18 +498,21 @@ Util.checkJWTToken = (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET,
       function (err, accountData) {
         if (err) {
-          req.flash("Please log in")
-          res.clearCookie("jwt")
-          return res.redirect("/account/login")
+          req.flash("notice", "Please log in");
+          res.clearCookie("jwt");
+          return res.redirect("/account/login");
         }
-        res.locals.accountData = accountData
-        res.locals.loggedin = 1
-        next()
-      })
+        res.locals.accountData = accountData;
+        res.locals.loggedin = true; 
+        next();
+      }
+    );
   } else {
-    next()
+    res.locals.loggedin = false; 
+    next();
   }
-}
+};
+
 
 /* ****************************************
  *  Check Login
@@ -522,5 +525,26 @@ Util.checkLogin = (req, res, next) => {
     return res.redirect("/account/login")
   }
 }
+/* ****************************************
+ *  Check Account Type for Admin/Employee
+ * ************************************ */
+Util.checkAccountType = (req, res, next) => {
+  
+  if (res.locals.loggedin && res.locals.accountData) {
+    const type = res.locals.accountData.account_type;
+
+    if (type === "Employee" || type === "Admin") {
+      
+      return next();
+    } else {
+      
+      req.flash("notice", "You do not have permission to access that view.");
+      return res.redirect("/account/login");
+    }
+  } else {
+    req.flash("notice", "Please log in.");
+    return res.redirect("/account/login");
+  }
+};
 
 module.exports = Util
