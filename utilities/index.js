@@ -41,6 +41,7 @@ Util.buildClassificationGrid = async function (data) {
         + 'details"><img src="' + vehicle.inv_thumbnail
         + '" alt="Image of ' + vehicle.inv_make + ' ' + vehicle.inv_model
         + ' on CSE Motors" /></a>'
+
       grid += '<div class="namePrice">'
       grid += '<hr />'
       grid += '<h2>'
@@ -51,6 +52,15 @@ Util.buildClassificationGrid = async function (data) {
       grid += '<span>$'
         + new Intl.NumberFormat('en-US').format(vehicle.inv_price) + '</span>'
       grid += '</div>'
+
+      
+      grid += `
+        <form action="/favorites/add" method="post" class="fav-form">
+          <input type="hidden" name="inv_id" value="${vehicle.inv_id}">
+          <button type="submit" class="fav-btn">⭐ Add to Favorites</button>
+        </form>
+      `
+
       grid += '</li>'
     })
     grid += '</ul>'
@@ -59,6 +69,7 @@ Util.buildClassificationGrid = async function (data) {
   }
   return grid
 }
+
 
 
 Util.buildDetailView = async function (data) {
@@ -75,16 +86,20 @@ Util.buildDetailView = async function (data) {
         <div class="vehicle-info">
           <h2>${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model}</h2>
           <p><strong>Price:</strong> $${price2}</p>
-          
           <p><strong>Mileage:</strong> ${milesFormatted} miles</p>
           <p><strong>Color:</strong> ${vehicle.inv_color}</p>
           <p><strong>Description:</strong> ${vehicle.inv_description}</p>
+
+          
+          <form action="/favorites/add" method="post" class="fav-form">
+            <input type="hidden" name="inv_id" value="${vehicle.inv_id}">
+            <button type="submit" class="fav-btn">⭐ Add to Favorites</button>
+          </form>
         </div>
       </div>
     `
   } else {
     detailView = "<p>No vehicle data available.</p>"
-
   }
 
   return detailView
@@ -546,5 +561,30 @@ Util.checkAccountType = (req, res, next) => {
     return res.redirect("/account/login");
   }
 };
+
+
+// favorites view 
+Util.buildFavoritesView = function(favorites) {
+  if (!favorites.length) {
+    return `<p>You have no favorites yet.</p>`;
+  }
+
+  return `
+    <div class="favorites-container">
+      ${favorites.map(item => `
+        <div class="favorite-card">
+          <img src="${item.inv_image}" alt="">
+          <h3>${item.inv_make} ${item.inv_model}</h3>
+          <p>$${Number(item.inv_price).toLocaleString()}</p>
+
+          <form action="/favorites/delete" method="POST">
+            <input type="hidden" name="favorite_id" value="${item.favorite_id}">
+            <button class="delete-btn">Remove</button>
+          </form>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}; 
 
 module.exports = Util

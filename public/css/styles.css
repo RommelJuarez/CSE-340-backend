@@ -651,3 +651,104 @@ input:required:valid {
     padding: 0.6rem;
   }
 }
+/* ------------------------------
+   ADD TO FAVORITES BUTTON
+------------------------------ */
+.add-favorite-btn {
+  margin-top: 1rem;
+  padding: 10px 16px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+
+.add-favorite-btn:hover {
+  background-color: #005fa3;
+}
+
+/* ------------------------------
+   FAVORITES CONTAINER
+------------------------------ */
+.favorites-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 10px;
+}
+
+/* ------------------------------
+   FAVORITE CARD
+------------------------------ */
+.favorite-card {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform .2s ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-3px);
+}
+
+.favorite-card img {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.favorite-card h3 {
+  font-size: 1.2rem;
+  margin: 8px 0;
+  color: #333;
+}
+
+.favorite-card p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* ------------------------------
+   DELETE FAVORITE button
+------------------------------ */
+.delete-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #a30000;
+}
+
+.fav-btn {
+  background: #fafaf9; /* amarillo suave */
+  color: #000;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fav-btn:hover {
+  background: #ff8902; /* amarillo un poco más intenso */
+  transform: translateY(-2px);
+}
+
